@@ -1,0 +1,30 @@
+{
+  "numberOfVerticles": 100,
+  "clientVerticleConfig": {
+    "requestOptions": {
+      "host": "localhost",
+      "port": 8888,
+      "ssl": true,
+      "uri": "/api"
+    },
+    "requestRate": 100,
+    "webClientOptions": {
+      "verifyHost": false,
+      "trustAll": true,
+      "keyStoreOptions": {
+        "alias": "client",
+        "password": "password",
+        "path": "client-keystore.jks"
+      },
+      "openSslEngineOptions": {
+        "sessionCacheEnabled": true,
+        "useWorkerThread": false
+      },
+      "trustStoreOptions": {
+        "alias": "server-cert",
+        "password": "password",
+        "path": "client-truststore.jks"
+      }
+    }
+  }
+}
