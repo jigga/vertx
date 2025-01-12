@@ -7,6 +7,7 @@ import io.vertx.core.Promise;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused") // used from the Gradle run task
 public class MainVerticle extends AbstractVerticle {
 
   @Override

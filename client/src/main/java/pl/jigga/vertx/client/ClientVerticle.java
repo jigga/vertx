@@ -12,6 +12,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 public class ClientVerticle extends AbstractVerticle {
 
   private WebClient webClient;
+  private long timerId;
 
   @Override
   public void start(Promise<Void> startPromise) {
@@ -27,7 +28,7 @@ public class ClientVerticle extends AbstractVerticle {
     final var requestOptionsJson = config().getJsonObject("requestOptions");
     final var requestOptions = new RequestOptions(requestOptionsJson);
 
-    vertx.setPeriodic(1000/requestRate, id -> sendRequest(requestOptions));
+    timerId = vertx.setPeriodic(1000/requestRate, id -> sendRequest(requestOptions));
     startPromise.complete();
   }
 
@@ -42,4 +43,11 @@ public class ClientVerticle extends AbstractVerticle {
       .onFailure(err -> System.err.println("Request failed: " + err.getMessage()));
   }
 
+  @Override
+  public void stop(Promise<Void> stopPromise) {
+    if (timerId > 0) {
+      vertx.cancelTimer(timerId);
+    }
+    stopPromise.complete();
+  }
 }
