@@ -4,21 +4,65 @@ image:https://img.shields.io/badge/vert.x-4.5.11-purple.svg[link="https://vertx.
 
 This application was generated using http://start.vertx.io
 
-== Building
+It contains the reproducer code for the `OutOfMemoryError: direct memory` issue that occurs when serving (`HTTP GET`) large payloads (70 MB) under heavy load.
 
-To launch your tests:
-```
-./gradlew clean test
-```
+== Running the server
 
-To package your application:
+To launch the server, run:
 ```
-./gradlew clean assemble
+./gradlew :server:run
 ```
 
-To run your application:
+== Running the client
+
+To run the client to put the load on the server, run:
 ```
-./gradlew clean run
+./gradlew :client:run
+```
+
+After running the client for some time (typically several seconds), you would start seeing the below exceptions in the server log.
+
+```
+java.lang.OutOfMemoryError: Cannot reserve 4194304 bytes of direct buffer memory (allocated: 6438264840, limit: 6442450944)
+        at java.base/java.nio.Bits.reserveMemory(Bits.java:178)
+        at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:111)
+        at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:360)
+        at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+        at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+        at io.netty.buffer.PoolArena.allocateNormal(PoolArena.java:213)
+        at io.netty.buffer.PoolArena.tcacheAllocateSmall(PoolArena.java:178)
+        at io.netty.buffer.PoolArena.allocate(PoolArena.java:135)
+        at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+        at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+        at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+        at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+        at io.vertx.core.buffer.impl.PartialPooledByteBufAllocator.directBuffer(PartialPooledByteBufAllocator.java:84)
+        at io.netty.handler.ssl.SslHandler$SslEngineType$1.allocateWrapBuffer(SslHandler.java:233)
+        at io.netty.handler.ssl.SslHandler.allocateOutNetBuf(SslHandler.java:2416)
+        at io.netty.handler.ssl.SslHandler.wrap(SslHandler.java:873)
+        at io.netty.handler.ssl.SslHandler.wrapAndFlush(SslHandler.java:828)
+        at io.netty.handler.ssl.SslHandler.handleUnwrapThrowable(SslHandler.java:1397)
+        at io.netty.handler.ssl.SslHandler.decodeNonJdkCompatible(SslHandler.java:1379)
+        at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1417)
+        at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)
+        at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)
+        at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)
+        at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+        at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+        at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+        at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+        at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+        at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+        at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+        at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+        at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+        at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+        at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+        at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+        at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
 ```
 
 == Help
